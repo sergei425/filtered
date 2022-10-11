@@ -98,10 +98,6 @@ const ServisesList = ({services, getId}) => {
   }
 
   const dispatch = useDispatch();
-
-  useEffect(() => {
-    getServices()
-  }, [services])
   
   return (
     <ul>
