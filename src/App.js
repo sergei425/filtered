@@ -1,45 +1,53 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { addService, removeService, updateService, filteredService } from "./store";
-import './App.css';
-
+import { addService, removeService, updateService } from "./store";
 
 export default function App() {
-  const services = useSelector((state) => state);
-  const [id, setId] = useState(0)
-  const [text, setText] = useState('')
-  const dispatch = useDispatch();
+  const [text, setText] = useState("");
+  const [id, setId] = useState(0);
+  let services = useSelector((state) => state);
+
+  const filterdServeces = () => {
+    if (Boolean(text)) {
+      services = services.filter((el) =>
+        el.title.toLowerCase().includes(text)
+      );
+    }
+  };
+
+  filterdServeces()
 
   const getId = (id) => {
-    setId(id)
-  }
+    setId(id);
+  };
 
   const getText = (str) => {
-    setText(str)
-    //dispatch(filteredService(text))
-  }
+    setText(str);
+  };
 
   useEffect(() => {
-    dispatch(filteredService(text))
-  }, [text])
+    filterdServeces()
+  }, [text]);
 
   return (
     <div className="App">
       <h1>Hello Redux Todo</h1>
-      <NewServise id={id} getId={getId}/>
-      <br/>
-      <ServisesFilterName getText={getText}/>
-      <ServisesList services={services} getId={getId}/>
+      <NewServise id={id} getId={getId} />
+      <br />
+      <ServisesFilterName getText={getText} />
+      <ServisesList services={services} getId={getId} />
     </div>
   );
 }
 
-const NewServise = ({id, getId}) => {
-  const service = useSelector((state) => state).find(el => el.id === id)
+const NewServise = ({ id, getId }) => {
+  const service = useSelector((state) => state).find(
+    (el) => el.id === id
+  );
 
   const [formData, setFormData] = useState({
-    title: '',
-    price: '',
+    title: "",
+    price: "",
   });
 
   const dispatch = useDispatch();
@@ -47,13 +55,13 @@ const NewServise = ({id, getId}) => {
   useEffect(() => {
     const getService = () => {
       if (service) {
-        const {title, price} = service
-        setFormData({ ...formData, title, price })
+        const { title, price } = service;
+        setFormData({ ...formData, title, price });
       }
-    }
-    getService()
-  }, [service])
-  
+    };
+    getService();
+  }, [service]);
+
   function fieldChangeHandle(evt) {
     const { name, value } = evt.target;
     setFormData({ ...formData, [name]: value });
@@ -61,55 +69,57 @@ const NewServise = ({id, getId}) => {
 
   const handleSubmit = (evt) => {
     evt.preventDefault();
-  if (service) {
-      dispatch(updateService({id, ...formData}))
-      formReset()
+    if (service) {
+      dispatch(updateService({ id, ...formData }));
+      formReset();
     } else {
       dispatch(addService(formData));
-      formReset()
-   }
+      formReset();
+    }
   };
 
   const formReset = () => {
-    setFormData({...formData, title: '', price: ''});
-    getId(0)
-  }
+    setFormData({ ...formData, title: "", price: "" });
+    getId(0);
+  };
 
   return (
     <form onSubmit={handleSubmit}>
-      <input type="text" name="title" onChange={fieldChangeHandle}  value={formData.title}/>
-      <input type="text" name="price" onChange={fieldChangeHandle} value={formData.price}/>
+      <input
+        type="text"
+        name="title"
+        onChange={fieldChangeHandle}
+        value={formData.title}
+      />
+      <input
+        type="text"
+        name="price"
+        onChange={fieldChangeHandle}
+        value={formData.price}
+      />
       <input type="submit" value="Add Todo" />
-      {Boolean(id) && <input type="reset" value="Cancel" onClick={formReset}/>}
+      {Boolean(id) && <input type="reset" value="Cancel" onClick={formReset} />}
     </form>
   );
 };
 
-const ServisesList = ({services, getId}) => {
-  console.log(services);
+const ServisesList = ({ services, getId }) => {
+  const dispatch = useDispatch();
+
   const getServices = () => {
     return services.map((el) => (
       <li key={el.id}>
-        {el.title}{el.price}
+        {el.title}
+        {el.price}
         <button onClick={() => getId(el.id)}>update</button>
         <button onClick={() => dispatch(removeService(el.id))}>delete</button>
       </li>
-    ))
-  }
+    ));
+  };
 
-  const dispatch = useDispatch();
-  
-  return (
-    <ul>
-      {getServices()}
-    </ul>
-  );
+  return <ul>{getServices()}</ul>;
 };
 
-
-const ServisesFilterName = ({getText}) => {
-  return (
-    <input type="text" onChange={({target}) => getText(target.value)} />
-  )
+const ServisesFilterName = ({ getText }) => {
+  return <input type="text" onChange={({ target }) => getText(target.value)} />;
 };
-
